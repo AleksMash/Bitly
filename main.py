@@ -20,8 +20,10 @@ def count_clicks(token, unschemed_link):
     headers = {
       'Authorization': f'Bearer {token}'
     }
-    end_point = f'https://api-ssl.bitly.com/v4/'\
-                f'bitlinks/{unschemed_link}/clicks/summary'
+    end_point = (
+        f'https://api-ssl.bitly.com/v4/'
+        f'bitlinks/{unschemed_link}/clicks/summary'
+    )
     response = requests.get(end_point, headers=headers)
     response.raise_for_status()
     json_data = response.json()
@@ -39,29 +41,31 @@ def is_bitlink(token, unschemed_link):
 
 def main():
     load_dotenv()
-    TOKEN = os.environ['BITLINK_TOKEN']
-    parser = argparse.ArgumentParser(description='Returns clicks count for the given URL (short link)')
+    token = os.environ['BITLINK_TOKEN']
+    parser = argparse.ArgumentParser(
+        description='Returns clicks count for the given URL (short link)'
+    )
     parser.add_argument('bitlink', help='URL (short link)')
     args = parser.parse_args()
     url = args.bitlink
     parsed_bitlink = urlparse(url)
     unschemed_link = f'{parsed_bitlink.netloc}{parsed_bitlink.path}'
-    if is_bitlink(TOKEN, unschemed_link):
+    if is_bitlink(token, unschemed_link):
         try:
-            clicks_count = count_clicks(TOKEN, unschemed_link)
+            clicks_count = count_clicks(token, unschemed_link)
         except requests.exceptions.HTTPError as err:
             print('\nAn error occurred while processing url:\n\n', err)
         else:
             print(f'\nThe given URL a bitlink.'
-            f'Total clicks count is {clicks_count}')
+                  f'Total clicks count is {clicks_count}')
     else:
         try:
-            bit_link = shorten_link(TOKEN, url)
+            bit_link = shorten_link(token, url)
         except requests.exceptions.HTTPError as err:
             print('\nAn error ocurred while processing url:\n\n', err)
         else:
             print(f'\nThe given URL is not a bitlink.'
-            f'\nGenereted bitlink for it is: {bit_link}')
+                  f'\nGenereted bitlink for it is: {bit_link}')
 
 
 if __name__ == '__main__':
